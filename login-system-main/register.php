@@ -1,170 +1,189 @@
-<?php session_start(); ?>
 <?php
-    include('connect/connection.php');
+session_start();
+include('connect/connection.php');
 
-    if(isset($_POST["register"])){
-        $email = $_POST["email"];
-        $password = $_POST["password"];
+$message = '';
 
-        $check_query = mysqli_query($connect, "SELECT * FROM login where email ='$email'");
-        $rowCount = mysqli_num_rows($check_query);
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register"])) {
+    $email = trim($_POST["email"]);
+    $password = trim($_POST["password"]);
 
-        if(!empty($email) && !empty($password)){
-            if($rowCount > 0){
-                ?>
-                <script>
-                    alert("User with email already exist!");
-                </script>
-                <?php
-            }else{
-                $password_hash = password_hash($password, PASSWORD_BCRYPT);
+    $check_query = mysqli_query($connect, "SELECT * FROM login WHERE email ='$email'");
+    $rowCount = mysqli_num_rows($check_query);
 
-                $result = mysqli_query($connect, "INSERT INTO login (email, password, status) VALUES ('$email', '$password_hash', 0)");
-    
-                if($result){
-                    $otp = rand(100000,999999);
-                    $_SESSION['otp'] = $otp;
-                    $_SESSION['mail'] = $email;
-                    require "Mail/phpmailer/PHPMailerAutoload.php";
-                    $mail = new PHPMailer;
-    
-                    $mail->isSMTP();
-                    $mail->Host='smtp.gmail.com';
-                    $mail->Port=587;
-                    $mail->SMTPAuth=true;
-                    $mail->SMTPSecure='tls';
-    
-                    $mail->Username='harvey.datoy21@gmail.com';
-                    $mail->Password='nwhn mukd qduj ukpl';
-    
-                    $mail->setFrom('harvey.datoy21@gmail.com', 'OTP Verification');
-                    $mail->addAddress($_POST["email"]);
-    
-                    $mail->isHTML(true);
-                    $mail->Subject="Your verify code";
-                    $mail->Body="<p>Dear user, </p> <h3>Your verify OTP code is $otp <br></h3>
-                    <br><br>
-                    <p>With regrads,</p>
-                    <b>Programming with Lam</b>
-                    https://www.youtube.com/channel/UCKRZp3mkvL1CBYKFIlxjDdg";
-    
-                            if(!$mail->send()){
-                                ?>
-                                    <script>
-                                        alert("<?php echo "Register Failed, Invalid Email "?>");
-                                    </script>
-                                <?php
-                            }else{
-                                ?>
-                                <script>
-                                    alert("<?php echo "Register Successfully, OTP sent to " . $email ?>");
-                                    window.location.replace('verification.php');
-                                </script>
-                                <?php
-                            }
+    if (!empty($email) && !empty($password)) {
+        if ($rowCount > 0) {
+            $message = "User with this email already exists.";
+        } else {
+            $password_hash = password_hash($password, PASSWORD_BCRYPT);
+
+            $result = mysqli_query($connect, "INSERT INTO login (email, password, status) VALUES ('$email', '$password_hash', 0)");
+
+            if ($result) {
+                $otp = rand(100000, 999999);
+                $_SESSION['otp'] = $otp;
+                $_SESSION['mail'] = $email;
+
+                require "Mail/phpmailer/PHPMailerAutoload.php";
+                $mail = new PHPMailer;
+
+                $mail->isSMTP();
+                $mail->Host = 'smtp.gmail.com';
+                $mail->Port = 587;
+                $mail->SMTPAuth = true;
+                $mail->SMTPSecure = 'tls';
+
+                $mail->Username = 'harvey.datoy21@gmail.com';
+                $mail->Password = 'nwhn mukd qduj ukpl';
+
+                $mail->setFrom('harvey.datoy21@gmail.com', 'OTP Verification');
+                $mail->addAddress($email);
+                $mail->isHTML(true);
+                $mail->Subject = "Your verification code";
+                $mail->Body = "<p>Dear user,</p><h3>Your OTP code is $otp</h3><p>Regards,<br><b>Verification Team</b></p>";
+
+                if (!$mail->send()) {
+                    $message = "Registration failed. Invalid email.";
+                } else {
+                    echo "<script>alert('Registered successfully. OTP sent to $email'); window.location='verification.php';</script>";
+                    exit();
                 }
             }
         }
     }
-
+}
 ?>
-
-<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
-<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css" />
-<!------ Include the above in your HEAD tag ---------->
-
 <!doctype html>
 <html lang="en">
 <head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta charset="UTF-8">
+    <title>Spotify Style Register</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- Fonts -->
-    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css?family=Raleway:300,400,600" rel="stylesheet" type="text/css">
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600&display=swap" rel="stylesheet">
+    <!-- Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background-color: #121212;
+            font-family: 'Montserrat', sans-serif;
+            color: #fff;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-    <link rel="icon" href="Favicon.png">
+        .register-box {
+            background-color: #181818;
+            padding: 3rem;
+            border-radius: 16px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+            width: 100%;
+            max-width: 450px;
+        }
 
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+        .register-box h2 {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
 
-    <title>Register Form</title>
+        .form-control {
+            background-color: #2a2a2a;
+            border: none;
+            color: #fff;
+            font-size: 1.1rem;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .form-control:focus {
+            background-color: #333;
+            outline: none;
+            box-shadow: 0 0 0 2px #1DB954;
+        }
+
+        .btn-green {
+            background-color: #1DB954;
+            color: #fff;
+            padding: 0.75rem;
+            font-size: 1.1rem;
+            border-radius: 30px;
+            border: none;
+            width: 100%;
+        }
+
+        .btn-green:hover {
+            background-color: #1ed760;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 1.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #b3b3b3;
+            cursor: pointer;
+        }
+
+        .position-relative {
+            position: relative;
+        }
+
+        .text-center a {
+            color: #1DB954;
+            text-decoration: none;
+        }
+
+        .text-center a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-light navbar-laravel">
-    <div class="container">
-        <a class="navbar-brand" href="#">Register Form</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+<div class="register-box">
+    <h2>Sign up for Spotify</h2>
 
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="index.php" >Login</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="register.php" style="font-weight:bold; color:black; text-decoration:underline">Register</a>
-                </li>
-            </ul>
+    <?php if (!empty($message)): ?>
+        <div class="alert alert-warning text-center"><?= $message ?></div>
+    <?php endif; ?>
 
+    <form method="POST" action="">
+        <div class="mb-4 position-relative">
+            <input type="email" name="email" class="form-control" placeholder="Email address" required>
         </div>
-    </div>
-</nav>
 
-<main class="login-form">
-    <div class="cotainer">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header">Register</div>
-                    <div class="card-body">
-                        <form action="#" method="POST" name="register">
-                            <div class="form-group row">
-                                <label for="email_address" class="col-md-4 col-form-label text-md-right">E-Mail Address</label>
-                                <div class="col-md-6">
-                                    <input type="text" id="email_address" class="form-control" name="email" required autofocus>
-                                </div>
-                            </div>
-
-                            <div class="form-group row">
-                                <label for="password" class="col-md-4 col-form-label text-md-right">Password</label>
-                                <div class="col-md-6">
-                                    <input type="password" id="password" class="form-control" name="password" required>
-                                    <i class="bi bi-eye-slash" id="togglePassword"></i>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6 offset-md-4">
-                                <input type="submit" value="Register" name="register">
-                            </div>
-                    </div>
-                    </form>
-                </div>
-            </div>
+        <div class="mb-4 position-relative">
+            <input type="password" name="password" id="password" class="form-control" placeholder="Password" required>
+            <i class="bi bi-eye-slash toggle-password" id="togglePassword"></i>
         </div>
-    </div>
-    </div>
 
-</main>
-</body>
-</html>
+        <div class="mb-4">
+            <button type="submit" name="register" class="btn btn-green">Register</button>
+        </div>
+    </form>
+
+    <div class="text-center">
+        <a href="index.php">Already have an account? Login</a>
+    </div>
+</div>
+
 <script>
     const toggle = document.getElementById('togglePassword');
     const password = document.getElementById('password');
 
-    toggle.addEventListener('click', function(){
-        if(password.type === "password"){
-            password.type = 'text';
-        }else{
-            password.type = 'password';
-        }
+    toggle.addEventListener('click', function () {
+        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+        password.setAttribute('type', type);
         this.classList.toggle('bi-eye');
     });
 </script>
+
+</body>
+</html>

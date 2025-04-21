@@ -1,151 +1,165 @@
 <?php
-    include('connect/connection.php');
+include('connect/connection.php');
 
-    if(isset($_POST["login"])){
-        $email = mysqli_real_escape_string($connect, trim($_POST['email']));
-        $password = trim($_POST['password']);
+if (isset($_POST["login"])) {
+    $email = mysqli_real_escape_string($connect, trim($_POST['email']));
+    $password = trim($_POST['password']);
 
-        $sql = mysqli_query($connect, "SELECT * FROM login where email = '$email'");
-        $count = mysqli_num_rows($sql);
+    $sql = mysqli_query($connect, "SELECT * FROM login WHERE email = '$email'");
+    $count = mysqli_num_rows($sql);
 
-            if($count > 0){
-                $fetch = mysqli_fetch_assoc($sql);
-                $hashpassword = $fetch["password"];
-    
-                if($fetch["status"] == 0){
-                    ?>
-                    <script>
-                        alert("Please verify email account before login.");
-                    </script>
-                    <?php
-                }else if(password_verify($password, $hashpassword)){
-                    ?>
-                    <script>
-                        alert("login in successfully");
-                    </script>
-                    <?php
-                }else{
-                    ?>
-                    <script>
-                        alert("email or password invalid, please try again.");
-                    </script>
-                    <?php
-                }
-            }
-                
+    if ($count > 0) {
+        $fetch = mysqli_fetch_assoc($sql);
+        $hashpassword = $fetch["password"];
+
+        if ($fetch["status"] == 0) {
+            echo "<script>alert('Please verify your email before logging in.');</script>";
+        } else if (password_verify($password, $hashpassword)) {
+            echo "<script>alert('Login successful.');</script>";
+        } else {
+            echo "<script>alert('Invalid email or password.');</script>";
+        }
     }
-
+}
 ?>
-
-<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
-<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css" />
-<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-<!------ Include the above in your HEAD tag ---------->
 
 <!doctype html>
 <html lang="en">
 <head>
-    <!-- Required meta tags -->
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Spotify Style Login</title>
 
-    <!-- Fonts -->
-    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css?family=Raleway:300,400,600" rel="stylesheet" type="text/css">
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600&display=swap" rel="stylesheet">
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background-color: #121212;
+            font-family: 'Montserrat', sans-serif;
+            color: #fff;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-    <link rel="icon" href="Favicon.png">
+        .login-box {
+            background-color: #181818;
+            padding: 3rem;
+            border-radius: 16px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+            width: 100%;
+            max-width: 450px;
+        }
 
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+        .login-box h2 {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
 
-    <title>Login Form</title>
+        .form-control {
+            background-color: #2a2a2a;
+            border: none;
+            color: #fff;
+            font-size: 1.1rem;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .form-control:focus {
+            background-color: #333;
+            outline: none;
+            box-shadow: 0 0 0 2px #1DB954;
+        }
+
+        .btn-green {
+            background-color: #1DB954;
+            color: #fff;
+            padding: 0.75rem;
+            font-size: 1.1rem;
+            border-radius: 30px;
+            border: none;
+            width: 100%;
+        }
+
+        .btn-green:hover {
+            background-color: #1ed760;
+        }
+
+        .form-check-label {
+            color: #b3b3b3;
+        }
+
+        .login-footer a {
+            color: #1DB954;
+            text-decoration: none;
+        }
+
+        .login-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 1.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #b3b3b3;
+            cursor: pointer;
+        }
+
+        .position-relative {
+            position: relative;
+        }
+    </style>
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-light navbar-laravel">
-    <div class="container">
-        <a class="navbar-brand" href="#">Login Form</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="index.php" style="font-weight:bold; color:black; text-decoration:underline">Login</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="register.php">Register</a>
-                </li>
-            </ul>
-
+<div class="login-box">
+    <h2>Log in to Spotify</h2>
+    <form action="#" method="POST" name="login">
+        <div class="mb-4 position-relative">
+            <input type="text" class="form-control" name="email" placeholder="Email address" required autofocus>
         </div>
-    </div>
-</nav>
 
-<main class="login-form">
-    <div class="cotainer">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header">Login</div>
-                    <div class="card-body">
-                        <form action="#" method="POST" name="login">
-                            <div class="form-group row">
-                                <label for="email_address" class="col-md-4 col-form-label text-md-right">E-Mail Address</label>
-                                <div class="col-md-6">
-                                    <input type="text" id="email_address" class="form-control" name="email" required autofocus>
-                                </div>
-                            </div>
-
-                            <div class="form-group row">
-                                <label for="password" class="col-md-4 col-form-label text-md-right">Password</label>
-                                <div class="col-md-6">
-                                    <input type="password" id="password" class="form-control" name="password" required>
-                                    <i class="bi bi-eye-slash" id="togglePassword"></i>
-                                </div>
-                            </div>
-
-                            <div class="form-group row">
-                                <div class="col-md-6 offset-md-4">
-                                    <div class="checkbox">
-                                        <label>
-                                            <input type="checkbox" name="remember"> Remember Me
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6 offset-md-4">
-                                <input type="submit" value="Login" name="login">
-                                <a href="recover_psw.php" class="btn btn-link">
-                                    Forgot Your Password?
-                                </a>
-                            </div>
-                    </div>
-                    </form>
-                </div>
-            </div>
+        <div class="mb-4 position-relative">
+            <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+            <i class="bi bi-eye-slash toggle-password" id="togglePassword"></i>
         </div>
-    </div>
-    </div>
 
-</main>
-</body>
-</html>
+        <div class="mb-4 form-check">
+            <input type="checkbox" class="form-check-input" id="remember" name="remember">
+            <label class="form-check-label" for="remember">Remember me</label>
+        </div>
+
+        <div class="mb-4">
+            <button type="submit" name="login" class="btn btn-green">Log In</button>
+        </div>
+
+        <div class="login-footer text-center">
+            <a href="recover_psw.php">Forgot your password?</a><br>
+            <a href="register.php">Don't have an account? Sign up</a>
+        </div>
+    </form>
+</div>
+
 <script>
     const toggle = document.getElementById('togglePassword');
     const password = document.getElementById('password');
 
-    toggle.addEventListener('click', function(){
-        if(password.type === "password"){
-            password.type = 'text';
-        }else{
-            password.type = 'password';
-        }
+    toggle.addEventListener('click', function () {
+        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+        password.setAttribute('type', type);
         this.classList.toggle('bi-eye');
     });
 </script>
+
+</body>
+</html>
