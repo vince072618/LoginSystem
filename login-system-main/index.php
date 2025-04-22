@@ -1,4 +1,5 @@
 <?php
+session_start();
 include('connect/connection.php');
 
 if (isset($_POST["login"])) {
@@ -15,13 +16,16 @@ if (isset($_POST["login"])) {
         if ($fetch["status"] == 0) {
             echo "<script>alert('Please verify your email before logging in.');</script>";
         } else if (password_verify($password, $hashpassword)) {
-            echo "<script>alert('Login successful.');</script>";
+            $_SESSION['email'] = $email;
+            header("Location: homepage.php");
+            exit(); // stop script here
         } else {
             echo "<script>alert('Invalid email or password.');</script>";
         }
     }
 }
 ?>
+
 
 <!doctype html>
 <html lang="en">
